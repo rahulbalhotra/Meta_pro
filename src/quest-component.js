@@ -1,43 +1,52 @@
-import {entity} from "./entity.js";
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
+import {entity} from './entity.js';
 
 
-export const quest_component = (() => {
-
-  const _TITLE = 'Product Description';
-  const _TEXT = `Here is button -->> >> [Button]`;
-  const _BUTTON = document.createElement("BUTTON");
-
-  class QuestComponent extends entity.Component {
-    constructor() {
+export const third_person_camera = (() => {
+  
+  class ThirdPersonCamera extends entity.Component {
+    constructor(params) {
       super();
 
-      const e = document.getElementById('quest-ui');
-      e.style.visibility = 'hidden';
+      this._params = params;
+      this._camera = params.camera;
+
+      this._currentPosition = new THREE.Vector3();
+      this._currentLookat = new THREE.Vector3();
     }
 
-    InitComponent() {
-      this._RegisterHandler('input.picked', (m) => this._OnPicked(m));
+    _CalculateIdealOffset() {
+      const idealOffset = new THREE.Vector3(-0, 10, -15);
+      idealOffset.applyQuaternion(this._params.target._rotation);
+      idealOffset.add(this._params.target._position);
+      return idealOffset;
     }
 
-    _OnPicked(msg) {
-      // HARDCODE A QUEST
-      const quest = {
-        id: 'foo',
-        title: _TITLE,
-        text: _TEXT,
-        BUTTON: _BUTTON
-
-      };
-      this._AddQuestToJournal(quest);
+    _CalculateIdealLookat() {
+      const idealLookat = new THREE.Vector3(0, 5, 20);
+      idealLookat.applyQuaternion(this._params.target._rotation);
+      idealLookat.add(this._params.target._position);
+      return idealLookat;
     }
 
-    _AddQuestToJournal(quest) {
-      const ui = this.FindEntity('ui').GetComponent('UIController');
-      ui.AddQuest(quest);
+    Update(timeElapsed) {
+      const idealOffset = this._CalculateIdealOffset();
+      const idealLookat = this._CalculateIdealLookat();
+
+      // const t = 0.05;
+      // const t = 4.0 * timeElapsed;
+      const t = 1.0 - Math.pow(0.01, timeElapsed);
+
+      this._currentPosition.lerp(idealOffset, t);
+      this._currentLookat.lerp(idealLookat, t);
+
+      this._camera.position.copy(this._currentPosition);
+      this._camera.lookAt(this._currentLookat);
     }
-  };
+  }
 
   return {
-      QuestComponent: QuestComponent,
+    ThirdPersonCamera: ThirdPersonCamera
   };
+
 })();
