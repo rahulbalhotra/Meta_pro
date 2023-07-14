@@ -1,9 +1,8 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
-import {entity} from './entity.js';
-
+import { entity } from './entity.js';
 
 export const third_person_camera = (() => {
-  
+
   class ThirdPersonCamera extends entity.Component {
     constructor(params) {
       super();
@@ -13,6 +12,14 @@ export const third_person_camera = (() => {
 
       this._currentPosition = new THREE.Vector3();
       this._currentLookat = new THREE.Vector3();
+
+      // Add event listener to the mouse click event
+      document.addEventListener('click', this.handleMouseClick.bind(this));
+    }
+//NEW ADDED
+    handleMouseClick() {
+      // Your code logic to be executed when the mouse is clicked
+      console.log('Mouse clicked!');
     }
 
     _CalculateIdealOffset() {
